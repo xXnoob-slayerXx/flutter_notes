@@ -1,21 +1,30 @@
 import 'package:flutter/material.dart';
 
-class NewNote extends StatefulWidget {
-  const NewNote({super.key});
+class NewNote extends StatelessWidget {
+  NewNote({super.key});
 
-  @override
-  State<NewNote> createState() => NewNoteState();
-}
+  TextEditingController titleController = TextEditingController();
+  TextEditingController noteController = TextEditingController();
+  String title = "";
+  String note = "";
 
-class NewNoteState extends State<NewNote> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 3,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: const Text(
-          "Add anas Note",
+          "Add Note",
           style: TextStyle(
               color: Colors.black, fontSize: 23, fontWeight: FontWeight.w800),
         ),
@@ -43,7 +52,7 @@ class NewNoteState extends State<NewNote> {
                 height: 20,
               ),
               TextFormField(
-                onFieldSubmitted: (value) {},
+                controller: titleController,
                 decoration: InputDecoration(
                   filled: true,
                   hintStyle: TextStyle(color: Colors.grey[600]),
@@ -68,7 +77,7 @@ class NewNoteState extends State<NewNote> {
                 height: 30,
               ),
               TextFormField(
-                onFieldSubmitted: (value) {},
+                controller: noteController,
                 maxLines: 10,
                 decoration: InputDecoration(
                   filled: true,
@@ -91,7 +100,25 @@ class NewNoteState extends State<NewNote> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(20.0),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            if (titleController.text.isEmpty || noteController.text.isEmpty) {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const AlertDialog(
+                      title: Text("Alert"),
+                      content: Text(
+                          "Please Make sure to fill the title or note area"),
+                    );
+                  });
+            } else {
+              title = titleController.text;
+              note = noteController.text;
+              // titleController.clear();
+              // noteController.clear();
+              Navigator.pop(context, [title, note]);
+            }
+          },
           backgroundColor: Colors.grey[200],
           child: const Icon(
             Icons.edit,
