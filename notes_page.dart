@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'new_note.dart';
+import 'note_details.dart';
+import 'database_helper.dart';
 
 class Notes extends StatefulWidget {
   const Notes({super.key});
@@ -8,7 +11,16 @@ class Notes extends StatefulWidget {
 }
 
 class NotesState extends State<Notes> {
+  List<Map<String, dynamic>>? notes = [];
   List<bool> isFavourite = [];
+  List<String> result = [];
+  bool isDBEmpty = true;
+  @override
+  void initState() {
+    super.initState();
+    // TODO: implement initState
+    print("initState");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +38,22 @@ class NotesState extends State<Notes> {
           "All Notes",
           style: TextStyle(color: Colors.black),
         ),
+        actions: [
+          IconButton(
+              onPressed: () async {
+                notes = await DBHelper.getDataFromDB();
+                if (notes != null || notes!.isNotEmpty) {
+                  isDBEmpty = false;
+                } else {
+                  isDBEmpty = true;
+                }
+                setState(() {});
+              },
+              icon: const Icon(
+                Icons.refresh,
+                color: Colors.black,
+              ))
+        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -58,10 +86,10 @@ class NotesState extends State<Notes> {
               ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 3,
+                  itemCount: notes!.length,
                   itemBuilder: (context, index) {
                     isFavourite.add(false);
-                    return noteItem(index);
+                    return noteItem(index, notes![index]);
                   }),
             ],
           ),
@@ -71,7 +99,15 @@ class NotesState extends State<Notes> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(50.0),
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () async {
+            result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return NewNote();
+              }),
+            );
+            await DBHelper.insertToDB(result[0], result[1]);
+          },
           backgroundColor: Colors.grey[200],
           child: const Icon(
             Icons.add,
@@ -83,7 +119,7 @@ class NotesState extends State<Notes> {
     );
   }
 
-  Widget noteItem(int index) {
+  Widget noteItem(int index, Map result) {
     return Column(
       children: [
         Container(
@@ -99,9 +135,17 @@ class NotesState extends State<Notes> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "anas' note",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NoteDetail(
+                          title: result['Title'], note: result['Note']),
+                    ),
+                  );
+                },
+                child: Text(
+                  "${result['Title']}",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 20,
